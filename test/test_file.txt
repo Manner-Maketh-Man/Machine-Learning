@@ -1,0 +1,8 @@
+happiness:너 덕분에 할수 있었어 고맙다ㅠㅠㅠ
+surprise:엥 진짜로 ?? 심각한데..;
+angry:왜 자꾸 하지 말란 짓을 골라서 하냐.. 뭐하자는거임?
+neutral:3시까지 만나자
+fear:갑자기 무섭게 왜그래.. 
+sadness or angry:만나서 얘기해 힘들다.. 이제
+neutral and sadness:이번에는 회의 참석 못할것 같아 미안,,
+neutral:오키 ~ 내일보자
