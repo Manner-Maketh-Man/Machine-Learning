@@ -75,17 +75,29 @@ if __name__ == "__main__":
                 file_path = os.path.join(root, file)
                 data_list.append(pd.read_excel(file_path))
 
-    data = data_list[0].iloc[:,1:3]
+    neu_data_list = []
+    neu_data = data_list[3].iloc[:, 1:]
+    neu_data.columns = ["context", "label"]
+    neu_data = neu_data.replace("중립", "neutral")
+    neu_data = neu_data.replace("놀람", "surprise")
+    neu_data = neu_data.replace("분노", "angry")
+    neu_data = neu_data.replace("슬픔", "sad")
+    neu_data = neu_data.replace("행복", "happiness")
 
-    for _ in range(1,3):
-        data = pd.concat([data,data_list[_].iloc[:,1:3]])
-    buf = data_list[3].iloc[:,1:]
-    #buf.columns = ['발화문',"a상황"]
-    #data = pd.concat([data,buf])
-    data.columns = ["context","label"]
+    neu_data_list.append(neu_data[neu_data.label == "neutral"])
+    neu_data_list.append(neu_data[neu_data.label == "surprise"])
+    neu_data_list.append(neu_data[neu_data.label == "angry"])
+    neu_data_list.append(neu_data[neu_data.label == "sad"])
+    neu_data_list.append(neu_data[neu_data.label == "happiness"])
 
-    data[data["label"] == "sadness"] = "sad"
-    data[data["label"] == "anger"] = "angry"
+    data = data_list[0].iloc[:, 1:3]
+    for _ in range(1, 3):
+        data = pd.concat([data, data_list[_].iloc[:, 1:3]])
+    data.columns = ["context", "label"]
+    for buf in neu_data_list:
+        data = pd.concat([data, buf])
+    data = data.replace("sadness", "sad")
+    data = data.replace("anger", "angry")
 
     train_x, val_x, train_y, val_y = train_test_split(data["context"],data["label"],test_size = 0.2,stratify=data["label"])
 
