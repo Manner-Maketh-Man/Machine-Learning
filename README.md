@@ -1,2 +1,2 @@
-# Machine-Learning
-# kobert
+# ML
+# KoBert
