@@ -1,6 +1,10 @@
 import torch
 torch.cuda.empty_cache()
 
+from transformers import logging
+logging.set_verbosity_error()
+
+import random
 import io
 import os
 import torch
@@ -37,12 +41,12 @@ if __name__ == "__main__":
     set_seed(123)
 
     # Number of training epochs (authors on fine-tuning Bert recommend between 2 and 4).
-    epochs = 4
+    epochs = 5
 
     # Number of batches - depending on the max sequence length and GPU memory.
     # For 512 sequence length batch of 10 works without cuda memory issues.
     # For small sequence length can try batch of 32 or higher.
-    batch_size = 32
+    batch_size = 64
 
     # Pad or truncate text sequences to a specific length
     # if `None` it will use maximum sequence of word piece tokens allowed by model.
@@ -57,6 +61,7 @@ if __name__ == "__main__":
     # Dictionary of labels and their id - this will be used to convert.
     # String labels to number ids.
     labels_ids = {'sad': 0, 'angry': 1, 'disgust': 2, 'happiness': 3, 'fear': 4,
+    
      'neutral': 5, 'surprise': 6}
     # How many labels are we using in training.
     # This is used to decide size of classification head.
@@ -78,17 +83,24 @@ if __name__ == "__main__":
     neu_data_list = []
     neu_data = data_list[3].iloc[:, 1:]
     neu_data.columns = ["context", "label"]
-    neu_data = neu_data.replace("중립", "neutral")
-    neu_data = neu_data.replace("놀람", "surprise")
-    neu_data = neu_data.replace("분노", "angry")
-    neu_data = neu_data.replace("슬픔", "sad")
-    neu_data = neu_data.replace("행복", "happiness")
+    neu_data["label"] = neu_data["label"].replace("중립", "neutral")
+    neu_data["label"] = neu_data["label"].replace("놀람", "surprise")
+    neu_data["label"] = neu_data["label"].replace("분노", "angry")
+    neu_data["label"] = neu_data["label"].replace("슬픔", "sad")
+    neu_data["label"] = neu_data["label"].replace("행복", "happiness")
+    neu_data["label"] = neu_data["label"].replace("혐오", "disgust")
+
+
+    neu_index = list(neu_data[neu_data["label"] == "neutral"].index)
+    remove_index = random.sample(neu_index, 33786)
+    neu_data = neu_data.drop(remove_index)
 
     neu_data_list.append(neu_data[neu_data.label == "neutral"])
     neu_data_list.append(neu_data[neu_data.label == "surprise"])
     neu_data_list.append(neu_data[neu_data.label == "angry"])
     neu_data_list.append(neu_data[neu_data.label == "sad"])
     neu_data_list.append(neu_data[neu_data.label == "happiness"])
+    neu_data_list.append(neu_data[neu_data.label == "disgust"])
 
     data = data_list[0].iloc[:, 1:3]
     for _ in range(1, 3):
@@ -98,6 +110,9 @@ if __name__ == "__main__":
         data = pd.concat([data, buf])
     data = data.replace("sadness", "sad")
     data = data.replace("anger", "angry")
+
+
+
 
     train_x, val_x, train_y, val_y = train_test_split(data["context"],data["label"],test_size = 0.2,stratify=data["label"])
 

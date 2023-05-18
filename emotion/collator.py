@@ -62,6 +62,7 @@ class Gpt2ClassificationCollator(object):
         labels = [self.labels_encoder[label] for label in labels]
         # Call tokenizer on all texts to convert into tensors of numbers with
         # appropriate padding.
+
         inputs = self.use_tokenizer(text=texts, return_tensors="pt", padding=True, truncation=True,
                                     max_length=self.max_sequence_len)
         # Update the inputs with the associated encoded labels as tensor.
