@@ -129,6 +129,7 @@ if __name__ == "__main__":
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     # Load KOGPT 
+    kogpt = Kogpt()
 
 
     # Load KOELECTRA 
@@ -151,7 +152,7 @@ if __name__ == "__main__":
     sentence = sentences[-1]
 
     # KOGPT Prediction
-    kogpt_prediction = 0
+    kogpt_prediction = kogpt.predict(sentence)
 
     # KOELECTRA Prediction
     koelectra_prediction = koelectra.predict(sentence)
