@@ -4,7 +4,55 @@ import re
 
 import torch
 from transformers import AutoTokenizer
+from transformers import logging
+logging.set_verbosity_error() # ingnore transformer warning 
 
+
+# kogpt model
+class Kogpt:
+    # check model path
+    MODEL_PATH = "./jm_model.pt"
+    TOKENIZER_NAME = "skt/kogpt2-base-v2"
+
+    def __init__(self):
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.tokenizer = AutoTokenizer.from_pretrained(self.TOKENIZER_NAME)
+        self.device = device
+        self.model = torch.load(self.MODEL_PATH, map_location=device)
+
+    def predict(self, sent):
+        # set my model max len
+        MAX_LEN = 60
+
+        self.model.eval()
+        self.tokenizer.padding_side = "right"
+        
+        # Define PAD Token = EOS Token = 50256
+        
+        self.tokenizer.pad_token = self.tokenizer.eos_token
+        tokenized_sent = self.tokenizer(
+            sent,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            add_special_tokens=True,
+            max_length=MAX_LEN
+        )
+
+        tokenized_sent.to(self.device)
+
+        with torch.no_grad():
+            outputs = self.model(
+                input_ids=tokenized_sent["input_ids"],
+                attention_mask=tokenized_sent["attention_mask"],
+            )
+
+        logits = outputs[0]
+        logits = logits.detach().cpu()
+        result = logits.argmax(-1)
+
+        return np.array(result)[0]
+    
 # koelectra model
 class Koelectra:
     # check model path
