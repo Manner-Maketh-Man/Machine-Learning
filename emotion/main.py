@@ -41,7 +41,7 @@ if __name__ == "__main__":
     set_seed(123)
 
     # Number of training epochs (authors on fine-tuning Bert recommend between 2 and 4).
-    epochs = 5
+    epochs = 20
 
     # Number of batches - depending on the max sequence length and GPU memory.
     # For 512 sequence length batch of 10 works without cuda memory issues.
