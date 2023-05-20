@@ -101,7 +101,7 @@ def train(model,dataloader, optimizer_, scheduler_, device_):
     avg_epoch_loss = total_loss / len(dataloader)
 
       # Return all true labels and prediction for future evaluations.
-    return true_labels, predictions_labels, avg_epoch_loss
+    return true_labels, predictions_labels, avg_epoch_loss ,model
 
 
 

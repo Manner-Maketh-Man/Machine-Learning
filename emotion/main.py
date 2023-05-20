@@ -46,7 +46,7 @@ if __name__ == "__main__":
     # Number of batches - depending on the max sequence length and GPU memory.
     # For 512 sequence length batch of 10 works without cuda memory issues.
     # For small sequence length can try batch of 32 or higher.
-    batch_size = 64
+    batch_size = 56
 
     # Pad or truncate text sequences to a specific length
     # if `None` it will use maximum sequence of word piece tokens allowed by model.
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-    model_name_or_path='skt/kogpt2-base-v2'
+    model_name_or_path = 'skt/kogpt2-base-v2'
 
     # Dictionary of labels and their id - this will be used to convert.
     # String labels to number ids.
@@ -209,13 +209,14 @@ if __name__ == "__main__":
     print('Current cuda device ', torch.cuda.current_device())
     print(torch.cuda.get_device_name(device))
 
+    store_model = None
     # Loop through each epoch.
     #print('Epoch')
     for epoch in (range(epochs)):
         print("Epoch : ",epoch+1)
         print('Training on batches...')
         # Perform one full pass over the training set.
-        train_labels, train_predict, train_loss = eval.train(model,train_dataloader, optimizer, scheduler, device)
+        train_labels, train_predict, train_loss,store_model = eval.train(model,train_dataloader, optimizer, scheduler, device)
         train_acc = accuracy_score(train_labels, train_predict)
 
       # Get prediction form model on validation data.
@@ -233,6 +234,11 @@ if __name__ == "__main__":
         all_loss['val_loss'].append(val_loss)
         all_acc['train_acc'].append(train_acc)
         all_acc['val_acc'].append(val_acc)
+
+
+    # save model
+    torch.save(store_model, f'./jm_model.pt')
+    print("saving model sucess")
 
     # Plot loss curves.
     plot_dict(all_loss, use_xlabel='Epochs', use_ylabel='Value', use_linestyles=['-', '--'])
