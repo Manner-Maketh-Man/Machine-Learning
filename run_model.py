@@ -3,10 +3,15 @@ import pandas as pd
 import re
 
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import gluonnlp as nlp
+from torch.utils.data import Dataset
 from transformers import AutoTokenizer
+from transformers import BertModel, BertTokenizer
 from transformers import logging
+import multiprocessing
 logging.set_verbosity_error() # ingnore transformer warning 
-
 
 # kogpt model
 class Kogpt:
@@ -92,6 +97,37 @@ class Koelectra:
         result = logits.argmax(-1)
         
         return np.array(result)[0]
+
+class Kobert:
+    MODEL_PATH = "KoBERT_ver2.pt"
+    def __init__(self, device):
+        self.tokenizer = BertTokenizer.from_pretrained("monologg/kobert")
+        self.model = torch.load(self.MODEL_PATH, map_location=device)
+        self.model.eval()
+        self.device = device
+
+    def predict(self, sentence):
+        max_len = 64
+        self.model.eval()
+        
+        encoding = self.tokenizer.encode_plus(
+            sentence,
+            add_special_tokens=True,
+            truncation=True,
+            max_length=max_len,
+            padding="max_length",
+            return_tensors="pt"
+        )
+
+        input_ids = encoding["input_ids"].squeeze().to(self.device)
+        attention_mask = encoding["attention_mask"].squeeze().to(self.device)
+
+        with torch.no_grad():
+            logits = self.model(input_ids.unsqueeze(0), attention_mask.unsqueeze(0))[0]
+            probabilities = F.softmax(logits, dim=-1).squeeze().cpu().numpy()
+            predicted_label = np.argmax(probabilities)
+        
+        return predicted_label
     
 def get_sentence(file):
     target = file["images"][0][0]['fields'][0]['inferText']
@@ -121,6 +157,9 @@ def get_sentence(file):
 
 
 if __name__ == "__main__":
+    
+    multiprocessing.set_start_method("spawn", True)
+    
     # Read JSON File
     JSON_FILE_PATH = "C:/vscode project/캡스톤/test/test_json_file_2.json"
     f = pd.read_json(JSON_FILE_PATH, lines=True)
@@ -137,7 +176,7 @@ if __name__ == "__main__":
 
 
     # Load KOBERT
-
+    kobert = Kobert(device)
 
     # Make Prediction
     label_decoder =  {0:"sadness",
@@ -158,7 +197,7 @@ if __name__ == "__main__":
     koelectra_prediction = koelectra.predict(sentence)
 
     # KOBERT Prediction
-    kobert_prediction = 0
+    kobert_prediction = kobert.predict(sentence)
 
 
     print(f"kogpt_prediction : {kogpt_prediction} : {label_decoder[kogpt_prediction]}")
@@ -170,4 +209,3 @@ if __name__ == "__main__":
     ensemble_result = max(prediction_list, key=prediction_list.count)
 
     print(f"ensemble_result : {ensemble_result} : {label_decoder[ensemble_result]}")
-    
