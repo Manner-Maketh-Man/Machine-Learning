@@ -97,7 +97,8 @@ class Koelectra:
         result = logits.argmax(-1)
         
         return np.array(result)[0]
-
+    
+# kobert model
 class Kobert:
     MODEL_PATH = "KoBERT_ver2.pt"
     def __init__(self, device):
