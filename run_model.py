@@ -11,7 +11,7 @@ from transformers import AutoTokenizer
 from transformers import BertModel, BertTokenizer
 from transformers import logging
 import multiprocessing
-logging.set_verbosity_error() # ingnore transformer warning 
+logging.set_verbosity_error() # ingnore transformer warning
 
 # kogpt model
 class Kogpt:
@@ -70,7 +70,7 @@ class Koelectra:
         self.model = torch.load(self.MODEL_PATH, map_location=device)
     
     def predict(self, sent):
-        # set my model max len 
+        # set my model max len
         MAX_LEN = 64
         
         self.model.eval()
@@ -99,6 +99,19 @@ class Koelectra:
         return np.array(result)[0]
     
 # kobert model
+class BERTClassifier(nn.Module):
+    def __init__(self, bert, num_classes):
+        super(BERTClassifier, self).__init__()
+        self.bert = bert
+        self.num_classes = num_classes
+        self.classifier = nn.Linear(768, self.num_classes)
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        pooled_output = outputs.pooler_output
+        logits = self.classifier(pooled_output)
+        return logits
+        
 class Kobert:
     MODEL_PATH = "KoBERT_ver2.pt"
     def __init__(self, device):
@@ -168,11 +181,11 @@ if __name__ == "__main__":
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    # Load KOGPT 
+    # Load KOGPT
     kogpt = Kogpt()
 
 
-    # Load KOELECTRA 
+    # Load KOELECTRA
     koelectra = Koelectra(device)
 
 
