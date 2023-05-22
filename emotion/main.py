@@ -19,6 +19,7 @@ from transformers import (set_seed,
                           GPT2Config,
                           GPT2Tokenizer,
                           AdamW,
+                          AutoTokenizer,
                           get_linear_schedule_with_warmup,
                           GPT2ForSequenceClassification)
 import pandas as pd
@@ -60,9 +61,8 @@ if __name__ == "__main__":
 
     # Dictionary of labels and their id - this will be used to convert.
     # String labels to number ids.
-    labels_ids = {'sad': 0, 'angry': 1, 'disgust': 2, 'happiness': 3, 'fear': 4,
-    
-     'neutral': 5, 'surprise': 6}
+    labels_ids = {'sad': 0, 'fear': 1, 'disgust': 2, 'neutral': 3, 'happiness': 4,
+     'angry': 5, 'surprise': 6}
     # How many labels are we using in training.
     # This is used to decide size of classification head.
     n_labels = len(labels_ids)
@@ -133,11 +133,13 @@ if __name__ == "__main__":
     print('Loading tokenizer...')
     from transformers import PreTrainedTokenizerFast
 
-    tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
-      bos_token='</s>', eos_token='</s>', unk_token='<unk>',
-      pad_token='<pad>', mask_token='<mask>')
+    tokenizer = AutoTokenizer.from_pretrained("skt/kogpt2-base-v2")
+
+    #tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
+    #  bos_token='</s>', eos_token='</s>', unk_token='<unk>',
+    #  pad_token='<pad>', mask_token='<mask>')
     # default to left padding
-    tokenizer.padding_side = "left"
+    tokenizer.padding_side = "right"
     # Define PAD Token = EOS Token = 50256
     tokenizer.pad_token = tokenizer.eos_token
 
