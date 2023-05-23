@@ -34,20 +34,18 @@ import dataset
 
 
 
-
-
 if __name__ == "__main__":
 
 
     set_seed(123)
 
     # Number of training epochs (authors on fine-tuning Bert recommend between 2 and 4).
-    epochs = 20
+    epochs = 6
 
     # Number of batches - depending on the max sequence length and GPU memory.
     # For 512 sequence length batch of 10 works without cuda memory issues.
     # For small sequence length can try batch of 32 or higher.
-    batch_size = 56
+    batch_size = 60
 
     # Pad or truncate text sequences to a specific length
     # if `None` it will use maximum sequence of word piece tokens allowed by model.
@@ -114,7 +112,7 @@ if __name__ == "__main__":
 
 
 
-    train_x, val_x, train_y, val_y = train_test_split(data["context"],data["label"],test_size = 0.2,stratify=data["label"])
+    train_x, val_x, train_y, val_y = train_test_split(data["context"],data["label"],test_size = 0.2,stratify=data["label"],random_state=0)
 
     train_data = pd.DataFrame(columns=["context", "label"])
     train_data["context"] = train_x
@@ -123,6 +121,8 @@ if __name__ == "__main__":
     val_data = pd.DataFrame(columns=["context", "label"])
     val_data["context"] = val_x
     val_data["label"] = val_y
+
+    val_data.to_csv("./test_data.csv")
 
 
 
